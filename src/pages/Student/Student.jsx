@@ -10,12 +10,15 @@ import {
 } from "@ant-design/icons";
 import { Layout, Menu, Button, theme, Popconfirm } from "antd";
 import { MdLogout, MdOutlineAnalytics } from "react-icons/md";
-import { FaBookOpen, FaPencilAlt } from "react-icons/fa";
+import { FaBookOpen, FaGrinStars, FaPencilAlt } from "react-icons/fa";
 import Me from "../common/Me";
 import Courses from "./Courses";
 import MyCourses from "./MyCourses";
 import Lessons from "./Lessons";
 import MyActivity from "./MyActivity";
+import Insight from "./Insight";
+import { IoStarSharp } from "react-icons/io5";
+import { BsStars } from "react-icons/bs";
 const { Header, Sider, Content } = Layout;
 
 const Student = () => {
@@ -30,6 +33,9 @@ const Student = () => {
   switch (selectedKey) {
     case "1":
       content = <StudentDashboard />;
+      break;
+    case "7":
+      content = <Insight />;
       break;
     case "2":
       content = <Courses />;
@@ -63,7 +69,6 @@ const Student = () => {
   useEffect(() => {
     window.addEventListener("resize", handleResize);
   }, []);
-
   return (
     <Layout className="w-100 bg-white" style={{ height: "100vh" }}>
       <Sider theme="light" trigger={null} collapsible collapsed={collapsed}>
@@ -77,6 +82,11 @@ const Student = () => {
               key: "1",
               icon: <DashboardOutlined />,
               label: "Dashboard",
+            },
+            {
+              key: "7",
+              icon: <BsStars />,
+              label: "Insight",
             },
             {
               key: "2",

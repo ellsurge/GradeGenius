@@ -18,7 +18,7 @@ const MyLessons = () => {
       render(item) {
         return (
           myCourses.length > 0 &&
-          myCourses.filter((course) => course._id == item.course)[0].title
+          myCourses.filter((course) => course._id === item.course)[0].title
         );
       },
     },
@@ -27,7 +27,7 @@ const MyLessons = () => {
       render(item) {
         return (
           myCourses.length > 0 &&
-          myCourses.filter((course) => course._id == item.course)[0].id
+          myCourses.filter((course) => course._id === item.course)[0].id
         );
       },
     },
@@ -89,7 +89,7 @@ const MyLessons = () => {
   );
 
   const myLessons = allLessons.filter(
-    (lesson) => lesson.uploadedBy == currentUser._id
+    (lesson) => lesson.uploadedBy === currentUser._id
   );
 
   const allExams = useSelector((state) => state.myReducer.exams);
@@ -119,7 +119,9 @@ const MyLessons = () => {
 
   const handleFileChange = (e, type) => {
     const file = e.target.files;
-    if (type == "lesson") {
+
+    if (type === "lesson") {
+      console.log("ok oko ko");
       const files = newLesson.files;
       files.push(file);
       setNewLesson({ ...newLesson, files: files });
@@ -131,13 +133,13 @@ const MyLessons = () => {
   };
 
   const handleRemoveFile = (fileToRemove, type) => {
-    if (type == "lesson") {
+    if (type === "lesson") {
       const files = newLesson.files;
-      const filteredFiles = files.filter((file) => file != fileToRemove);
+      const filteredFiles = files.filter((file) => file !== fileToRemove);
       setNewLesson({ ...newLesson, files: filteredFiles });
     } else {
       const files = newExam.files;
-      const filteredFiles = files.filter((file) => file != fileToRemove);
+      const filteredFiles = files.filter((file) => file !== fileToRemove);
       setNewExam({ ...newExam, files: filteredFiles });
     }
   };
@@ -162,7 +164,7 @@ const MyLessons = () => {
       .then((res) => res.json())
       .then((res) => {
         setNewLesson({});
-        showAddModal(false);
+        setShowAddModal(false);
       })
       .catch((err) => {
         console.log("error", err);
@@ -186,7 +188,7 @@ const MyLessons = () => {
       .then((res) => res.json())
       .then((res) => {
         setNewExam({});
-        showAddExamModal(false);
+        setShowAddExamModal(false);
       })
       .catch((err) => {
         console.log("error", err);
@@ -196,12 +198,12 @@ const MyLessons = () => {
 
   const filterData = () => {
     const filtered =
-      filterBy == "name"
+      filterBy === "name"
         ? myLessons &&
           myLessons.filter((lesson) =>
             lesson.title.toLowerCase().includes(filterCondition.toLowerCase())
           )
-        : myLessons.filter((lesson) => lesson.course == filterCondition);
+        : myLessons.filter((lesson) => lesson.course === filterCondition);
     setFilteredLessons(filtered);
   };
 
@@ -254,7 +256,7 @@ const MyLessons = () => {
             className="d-flex align-items-center ms-2 mt-2 mt-md-0"
             style={{ maxWidth: "10rem" }}
           >
-            {filterBy == "name" && (
+            {filterBy === "name" && (
               <Input
                 onChange={(e) => {
                   setFilterCondition(e.target.value);
@@ -262,7 +264,7 @@ const MyLessons = () => {
                 value={filterCondition}
               />
             )}
-            {filterBy == "course" && (
+            {filterBy === "course" && (
               <Select
                 className="w-100"
                 value={filterCondition}
@@ -309,7 +311,7 @@ const MyLessons = () => {
                 ))}
             </Select>
             <label htmlFor="course" className="mt-2">
-              Give your lesson a title
+              Give your lesson a titles
             </label>
             <Input
               value={newLesson.title}
@@ -320,13 +322,13 @@ const MyLessons = () => {
             <label className="mt-2">Attach Files</label>
             <Button
               onClick={() => {
-                document.getElementById("attachFile").click();
+                document.getElementById("attachLesson").click();
               }}
               style={{ maxWidth: "10rem" }}
               icon={<UploadOutlined />}
               className="bg-success text-white"
             >
-              {newLesson.files.length > 0 ? "Add File" : "Upload"}
+              {newLesson.files?.length > 0 ? "Add File" : "Upload"}
             </Button>
             <div className="w-100 d-flex flex-column">
               <small>Uploaded Files :</small>
@@ -360,8 +362,8 @@ const MyLessons = () => {
               Finish
             </Button>
             <input
-              id="attachFile"
-              onChange={handleFileChange}
+              id="attachLesson"
+              onChange={(e) => handleFileChange(e, "lesson")}
               hidden
               type="file"
               multiple
@@ -455,11 +457,11 @@ const MyLessons = () => {
               icon={<UploadOutlined />}
               className="bg-success text-white"
             >
-              {newExam.files.length > 0 ? "Add File" : "Upload"}
+              {newExam.files?.length > 0 ? "Add File" : "Upload"}
             </Button>
             <div className="w-100 d-flex flex-column">
               <small>Uploaded Files :</small>
-              {newExam.files.length > 0 ? (
+              {newExam.files?.length > 0 ? (
                 <ul>
                   {newExam.files.map((file) => (
                     <li className="d-flex align-items-center">

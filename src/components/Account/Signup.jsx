@@ -267,7 +267,7 @@ const Signup = () => {
         <small className="mt-2">
           Already have an{" "}
           <a className="text-blue text-decoration-none" href="/#">
-            AcademiX
+            GradeGenius
           </a>{" "}
           account?
         </small>

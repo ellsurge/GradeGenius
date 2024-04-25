@@ -16,7 +16,8 @@ const MyActivity = () => {
       render(item) {
         const course =
           myFinalCourses.length > 0 &&
-          myFinalCourses.filter((course) => course._id == item.course)[0].title;
+          myFinalCourses.filter((course) => course._id === item.course._id)[0]
+            .title;
         return course;
       },
     },
@@ -25,7 +26,7 @@ const MyActivity = () => {
       render(item) {
         const lesson =
           myLessons && item.lesson
-            ? myLessons.filter((lesson) => lesson._id == item.lesson)[0].title
+            ? myLessons.filter((lesson) => lesson._id === item.lesson._id)[0].title
             : "-";
         return lesson;
       },
@@ -43,9 +44,9 @@ const MyActivity = () => {
       },
     },
     {
-      title: "Started in",
+      title: "Grade",
       render(item) {
-        return item.createdAt.split("T")[0];
+        return item.grade ;
       },
     },
     {
@@ -78,29 +79,30 @@ const MyActivity = () => {
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
   const myCourses = allCourses.filter(
-    (course) => course.department == currentUser.department
+    (course) => course.department === currentUser.department
   );
 
   const courseRegs = useSelector((state) => state.myReducer.courseRegs);
-  const myCourseRegs = courseRegs.filter((cr) => cr.user == currentUser._id);
+  const myCourseRegs = courseRegs.filter((cr) => cr.user === currentUser._id);
 
   const myFinalCourses = myCourses.filter((course) => {
     let isInMyCourseRegs =
-      myCourseRegs.filter((cr) => cr.course == course._id).length > 0;
+      myCourseRegs.filter((cr) => cr.course === course._id).length > 0;
     return isInMyCourseRegs;
   });
   const allLessons = useSelector((state) => state.myReducer.lessons);
   const myLessons = allLessons.filter((lesson) => {
     const isOfMyCourse =
-      myFinalCourses.filter((course) => course._id == lesson.course).length > 0;
+      myFinalCourses.filter((course) => course._id === lesson.course).length >
+      0;
     return isOfMyCourse;
   });
 
   const activities = useSelector((state) => state.myReducer.studentActivities);
   const myActivities = activities.filter(
-    (activity) => activity.student == currentUser._id
+    (activity) => activity.student._id === currentUser._id
   );
-
+  console.log(activities);
   const notes = useSelector((state) => state.myReducer.studentNotes);
 
   const [showAddActivityModal, setShowAddActivityModal] = useState(false);
@@ -129,9 +131,9 @@ const MyActivity = () => {
       } else {
         createNewActivity();
       }
-    } else if (type == "add-note") {
+    } else if (type === "add-note") {
       createNewNote();
-    } else if (type == "edit-note") {
+    } else if (type === "edit-note") {
       updateNote();
     } else {
     }
@@ -236,7 +238,8 @@ const MyActivity = () => {
     fetcher("get-all-student-activities")
       .then((res) => {
         const activities = res.result;
-        if (activities != undefined) dispatch(setStudentActivities(activities));
+        if (activities !== undefined)
+          dispatch(setStudentActivities(activities));
       })
       .catch((err) => {
         console.log("Getting Student Activity ERROR", err);
@@ -247,7 +250,7 @@ const MyActivity = () => {
     fetcher("get-all-student-notes")
       .then((res) => {
         const notes = res.result;
-        if (notes != undefined) dispatch(setStudentNotes(notes));
+        if (notes !== undefined) dispatch(setStudentNotes(notes));
       })
       .catch((err) => {
         console.log("Getting Student Activity ERROR", err);
@@ -262,14 +265,14 @@ const MyActivity = () => {
             Course : {""}
             {myFinalCourses.length > 0 &&
               myFinalCourses.filter(
-                (course) => course._id == selectedActivity.course
+                (course) => course._id === selectedActivity.course._id
               )[0].title}
           </li>
           <li>
             Lesson : {""}
             {myLessons.length > 0 &&
               myLessons.filter(
-                (lesson) => lesson._id == selectedActivity.lesson
+                (lesson) => lesson._id === selectedActivity.lesson._id
               )[0].title}
           </li>
           <li>
@@ -307,7 +310,7 @@ const MyActivity = () => {
           {selectedActivity.notes.length > 0 || !status.viewNote ? (
             !status.viewNote && !status.addNote ? (
               selectedActivity.notes.map((note) => {
-                const thisNote = notes.filter((nt) => nt._id == note)[0];
+                const thisNote = notes.filter((nt) => nt._id === note._id)[0];
                 return (
                   <li className="d-flex align-items-center">
                     <p
@@ -691,8 +694,19 @@ const MyActivity = () => {
     <div className="w-100">
       <h5 className="text-center">My Activity</h5>
       <div className="mx-auto" style={{ maxWidth: "80%" }}>
-        {myActivities.length != 0 ? (
+        {myActivities.length !== 0 ? (
           <div className="w-100">
+            <div className=" mt-3 p-3">
+              <Button
+                type="primary"
+                className="mt-3"
+                onClick={() => {
+                  setShowAddActivityModal(true);
+                }}
+              >
+                Add an activity
+              </Button>
+            </div>
             <AntdTable columns={columns} data={myActivities} />
           </div>
         ) : (
@@ -734,7 +748,7 @@ const MyActivity = () => {
                 setInput({ ...input, course: val });
                 setStatus({ ...status, inputs: {} });
                 setFiltLessons(
-                  myLessons.filter((lesson) => lesson.course == val)
+                  myLessons.filter((lesson) => lesson.course === val)
                 );
               }}
               status={status.inputs.course}

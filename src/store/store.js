@@ -11,6 +11,7 @@ const myReducer = createSlice({
     exams: [],
     studentActivities: [],
     studentNotes: [],
+    insight:{counter:0},
   },
   reducers: {
     setUsers: (state, action) => {
@@ -38,6 +39,9 @@ const myReducer = createSlice({
       state.studentNotes = action.payload;
     },
   },
+  setInsight: (state, action) => {
+    state.insight = action.payload;
+  },
 });
 
 const store = configureStore({
@@ -55,5 +59,6 @@ export const {
   setExams,
   setStudentNotes,
   setStudentActivities,
+  setInsight,
 } = myReducer.actions;
 export default store;

@@ -13,31 +13,33 @@ const MyCourses = () => {
     if (error) message.error("Fetching Data Error !");
   }, [error]);
 
-  const columns = [
-    {
-      title: "Name",
-      dataIndex: "title",
+const columns = [
+  {
+    title: "Name",
+    dataIndex: "title",
+  },
+  {
+    title: "Course ID",
+    dataIndex: "id",
+  },
+  {
+    title: "Registered in",
+    render(item) {
+      const courseReg = courseRegs.find((cr) => cr.course === item._id);
+      return courseReg ? courseReg.createdAt.split("T")[0] : "";
     },
-    {
-      title: "Course ID",
-      dataIndex: "id",
-    },
-    {
-      title: "Registered in",
-      render(item) {
-        const courseReg = courseRegs.filter((cr) => cr.course == item._id)[0];
-        return courseReg.createdAt.split("T")[0];
-      },
-    },
-    {
-      title: "My Status",
-      render(item) {
-        const courseReg = courseRegs.filter((cr) => cr.course == item._id)[0];
-        const { createdAt, updatedAt } = courseReg;
+  },
+  {
+    title: "My Status",
+    render(item) {
+      const courseReg = courseRegs.find((cr) => cr.course === item._id);
+
+      if (courseReg) {
+        const { createdAt, updatedAt, status } = courseReg;
         const timeLapse =
           new Date(updatedAt).getDate() - new Date(createdAt).getDate();
-        return `${courseReg.status} ${
-          courseReg.status == "finished"
+        return `${status} ${
+          status === "finished"
             ? "( in " +
               timeLapse +
               " " +
@@ -45,37 +47,42 @@ const MyCourses = () => {
               ")"
             : ""
         }`;
-      },
+      } else {
+        return ""; // Handle the case when courseReg is not found
+      }
     },
-    {
-      title: "Total Lessons",
-      render(item) {
-        const totalLesson = myLessons.filter(
-          (lesson) => lesson.course == item._id
-        ).length;
-        return totalLesson;
-      },
+  },
+  {
+    title: "Total Lessons",
+    render(item) {
+      const totalLesson = myLessons.filter(
+        (lesson) => lesson.course === item._id
+      ).length;
+      return totalLesson;
     },
-    {
-      title: "Actions",
-      render(item) {
-        const courseReg =
-          courseRegs && courseRegs.filter((cr) => cr.course == item._id)[0];
-        return (
-          courseReg.status == "registered" && (
-            <Popconfirm
-              title="Finish this course ?"
-              onConfirm={() => {
-                updateCourseReg(courseReg, "finished");
-              }}
-            >
-              <Button type="primary">Finish</Button>
-            </Popconfirm>
-          )
-        );
-      },
+  },
+  {
+    title: "Actions",
+    render(item) {
+      const courseReg =
+        courseRegs && courseRegs.find((cr) => cr.course === item._id);
+      return (
+        courseReg &&
+        courseReg.status === "registered" && (
+          <Popconfirm
+            title="Finish this course ?"
+            onConfirm={() => {
+              updateCourseReg(courseReg, "finished");
+            }}
+          >
+            <Button type="primary">Finish</Button>
+          </Popconfirm>
+        )
+      );
     },
-  ];
+  },
+];
+
 
   const updateCourseReg = (courseReg, status) => {
     fetch(`${apiUrl}/update-course-reg/${courseReg._id}`, {

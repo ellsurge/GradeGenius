@@ -27,6 +27,8 @@ const { google } = require("googleapis");
 const { v4: uuidv4 } = require("uuid");
 const OAuth2 = google.auth.OAuth2;
 const port = process.env.PORT || 3001;
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 
 mongoose
   .connect(mongodburl, {
@@ -40,6 +42,13 @@ mongoose
     console.error("MongoDB connection error:", error);
   });
 
+/* AI API */
+
+// Access your API key as an environment variable (see "Set up your API key" above)
+
+// ...
+
+// ...
 /*UTILITIES */
 
 const storage = multer.diskStorage({
@@ -54,6 +63,74 @@ const upload = multer({
 }).array("files", 10);
 
 /*   API ROUTES    */
+
+app.post("/migrate", async (req, res) => {
+  try {
+    // Define an array of all models to migrate
+    const models = [
+      User,
+      Department,
+      Course,
+      Token,
+      CourseRegistration,
+      StudentActivity,
+      StudentNote,
+      Lesson,
+      Exam,
+    ];
+
+    // Iterate over each model
+    for (const Model of models) {
+      // Retrieve existing documents from the collection
+      const documents = await Model.find();
+
+      // Iterate over each document and apply migration logic if necessary
+      for (const doc of documents) {
+        // Example: Add a 'grade' field to StudentActivity documents if it doesn't exist
+        if (Model.modelName === "StudentActivity" && !doc.grade) {
+          doc.grade = "N/A";
+          await doc.save();
+        }
+        // Add more logic for other models as needed
+      }
+    }
+
+    // Return success response
+    res.json({ message: "Data migration completed successfully." });
+  } catch (error) {
+    console.error("Error migrating data:", error);
+    // Return error response
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Route to handle the /ai::prompt endpoint
+app.post("/ai", (req, res) => {
+  // Extract the prompt from the request body
+  const { prompt } = req.body;
+
+  // Check if prompt is provided
+  if (!prompt) {
+    return res.status(400).json({ error: "Prompt is required." });
+  }
+
+  // Generate content based on the prompt using the gemini-pro model
+  const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro-latest" });
+
+  model
+    .generateContent(prompt)
+    .then((result) => result.response.text())
+    .then((text) => {
+      // Return the generated text in the response
+      res.json({ result: text });
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+      // Return error response
+      res.status(500).json({ error: "Internal server error" });
+    });
+});
+
 app.post("/create-account", (req, response) => {
   const { name, email, password, grade, department, role } = req.body;
   bcrypt
@@ -77,117 +154,110 @@ app.post("/create-account", (req, response) => {
 });
 
 app.post("/send-email", (req, response) => {
-  const { isHtml, to, subject, html, text } = req.body;
+  // {
+  //   //   const htmlContent = `
+  //   // <!DOCTYPE html>
+  //   // <html lang="en">
+  //   // <head>
+  //   // <meta charset="UTF-8">
+  //   // <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  //   // <title>Account Status Update</title>
+  //   // <style>
+  //   // *{
+  //   //   box-sizing:border-box;
+  //   // }
+  //   //   body {
+  //   //     font-family: Arial, sans-serif;
+  //   //     margin: 0;
+  //   //     padding: 0;
+  //   //     background-color: #f4f4f4;
+  //   //   }
+  //   //   .container {
+  //   //     max-width: 600px;
+  //   //     margin: 20px auto;
+  //   //     padding: 20px;
+  //   //     background-color: #fff;
+  //   //     border:1px solid black;
+  //   //     border-radius: 8px;
+  //   //     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  //   //   }
+  //   //   h1 {
+  //   //     color: #333;
+  //   //     text-align: center;
+  //   //   }
+  //   //   p {
+  //   //     color: #666;
+  //   //     line-height: 1.6;
+  //   //   }
+  //   //   .button {
+  //   //     display: block;
+  //   //     width:10rem;
+  //   //     padding: 10px 20px;
+  //   //     background-color: darkslategray;
+  //   //     color: white;
+  //   //     border-radius: 5px;
+  //   //     margin: 20px auto;
+  //   //   }
+  //   //   .link{
+  //   //     text-decoration: none;
+  //   //     color:white !important;
+  //   //   }
+  //   // </style>
+  //   // </head>
+  //   // <body>
+  //   //   <div class="container">
+  //   //     ${html ? html : ""}
+  //   //     <button class="button">
+  //   //     <a class="link" noreferrer target='_blank' noopener href=${
+  //   //       process.env.NODE_ENV === "production"
+  //   //         ? "https://GradeGenius-1.onrender.com/"
+  //   //         : "http://localhost:3000"
+  //   //     }>Visit Our Website</a>
+  //   //     </button>
+  //   //   </div>
+  //   // </body>
+  //   // </html>
+  //   // `;
 
-  const htmlContent = `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Account Status Update</title>
-<style>
-*{
-  box-sizing:border-box;
-}
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
-  }
-  .container {
-    max-width: 600px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #fff;
-    border:1px solid black;
-    border-radius: 8px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-  }
-  h1 {
-    color: #333;
-    text-align: center;
-  }
-  p {
-    color: #666;
-    line-height: 1.6;
-  }
-  .button {
-    display: block;
-    width:10rem;
-    padding: 10px 20px;
-    background-color: darkslategray;
-    color: white;
-    border-radius: 5px;
-    margin: 20px auto;
-  }
-  .link{
-    text-decoration: none;
-    color:white !important;
-  }
-</style>
-</head>
-<body>
-  <div class="container">
-    ${html ? html : ""}
-    <button class="button">
-    <a class="link" noreferrer target='_blank' noopener href=${
-      process.env.NODE_ENV === "production"
-        ? "https://academix-1.onrender.com/"
-        : "http://localhost:3000"
-    }>Visit Our Website</a>
-    </button>
-  </div>
-</body>
-</html>
-`;
+  //   //   const oauth2Client = new OAuth2(
+  //   //     process.env.NODE_MAILER_CLIENT_ID,
+  //   //     process.env.NODE_MAILER_CLIENT_SECRET,
+  //   //     "https://developers.google.com/oauthplayground"
+  //   //   );
 
-  const oauth2Client = new OAuth2(
-    process.env.NODE_MAILER_CLIENT_ID,
-    process.env.NODE_MAILER_CLIENT_SECRET,
-    "https://developers.google.com/oauthplayground"
-  );
+  //   //   oauth2Client.setCredentials({
+  //   //     refresh_token: process.env.NODE_MAILER_REFRESH_TOKEN,
+  //   //   });
 
-  oauth2Client.setCredentials({
-    refresh_token: process.env.NODE_MAILER_REFRESH_TOKEN,
-  });
+  //   //   const accessToken = new Promise((resolve, reject) => {
+  //   //     oauth2Client.getAccessToken((err, token) => {
+  //   //       if (err) {
+  //   //         response.json({ error: err });
+  //   //       }
+  //   //     });
+  //   //   });
 
-  const accessToken = new Promise((resolve, reject) => {
-    oauth2Client.getAccessToken((err, token) => {
-      if (err) {
-        response.json({ error: err });
-      }
-    });
-  });
+  //   //   const transporter = nodemailer.createTransport({
+  //   //     service: "gmail",
+  //   //     auth: {
+  //   //       type: "OAuth2",
+  //   //       user: process.env.NODE_MAILER_EMAIL,
+  //   //       accessToken,
+  //   //       clientId: process.env.NODE_MAILER_CLIENT_ID,
+  //   //       clientSecret: process.env.NODE_MAILER_CLIENT_SECRET,
+  //   //       refreshToken: process.env.NODE_MAILER_REFRESH_TOKEN,
+  //   //     },
+  //   //   });
 
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      type: "OAuth2",
-      user: process.env.NODE_MAILER_EMAIL,
-      accessToken,
-      clientId: process.env.NODE_MAILER_CLIENT_ID,
-      clientSecret: process.env.NODE_MAILER_CLIENT_SECRET,
-      refreshToken: process.env.NODE_MAILER_REFRESH_TOKEN,
-    },
-  });
-
-  const mailOptions = {
-    from: '"Fanuel Amare from AcademiX "<fanu7.dev@gmail.com>',
-    to: to,
-    subject: subject,
-    text: isHtml ? "" : text,
-    html: isHtml ? htmlContent : "",
-  };
-
-  transporter.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      response.json({ error: error });
-    } else {
-      response.json({ result: info.response });
-    }
-  });
+  //   //   const mailOptions = {
+  //   //     from: '"Fanuel Amare from GradeGenius "<fanu7.dev@gmail.com>',
+  //   //     to: to,
+  //   //     subject: subject,
+  //   //     text: isHtml ? "" : text,
+  //   //     html: isHtml ? htmlContent : "",
+  //   //   };
+  // }
+  response.json({ result: "pass" });
 });
 
 app.post("/change-password/:id", (req, response) => {
@@ -219,7 +289,6 @@ app.post("/change-profile/:id", (req, response) => {
       response.json({ error: err });
     });
 });
-
 app.post("/update-user/:id", (req, response) => {
   const { account_status } = req.body;
   const id = req.params.id;
@@ -551,8 +620,13 @@ app.get("/deactivate-token/:token", (req, response) => {
 
 app.get("/get-all-student-activities", (req, response) => {
   StudentActivity.find()
+    .populate("student")
+    .populate("notes")
+    .populate("lesson")
+    .populate("course")
     .then((res) => response.json({ result: res }))
     .catch((err) => {
+      console.error("Error fetching student activities:", err);
       response.json({ error: err });
     });
 });
@@ -574,13 +648,34 @@ app.post("/create-student-activity", (req, response) => {
     });
 });
 
-app.post("/update-student-activity/:id", async (req, response) => {
+app.post("/update-student-activity/:id", async (req, res) => {
   const { id } = req.params;
   const updateData = req.body;
-  if (updateData.note) {
+  // console.log(id, updateData.grade);
+
+  try {
     const activity = await StudentActivity.findById(id);
-    activity.notes.push(updateData.note);
-    activity.save().then((res) => response.json({ result: res }));
+
+    if (!activity) {
+      return res.status(404).json({ error: "Activity not found" });
+    }
+
+    if (updateData.note) {
+      // Update notes
+      activity.notes.push(updateData.note);
+    }
+    if (updateData.grade !== undefined) {
+      // Update grade only if it's defined
+      activity.grade = updateData.grade;
+    }
+
+    // Save the updated activity
+    await activity.save();
+
+    res.json({ result: activity });
+  } catch (error) {
+    console.error("Error updating activity:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 

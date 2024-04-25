@@ -10,10 +10,11 @@ import {
 } from "@ant-design/icons";
 import { Layout, Menu, Button, theme, Popconfirm } from "antd";
 import { MdLogout } from "react-icons/md";
-import { FaPencilAlt } from "react-icons/fa";
+import { FaPencilAlt, FaWaveSquare } from "react-icons/fa";
 import MyCourses from "./MyCourses";
 import MyLessons from "./MyLessons";
 import Me from "../common/Me";
+import MyActivity from "./MyActivity";
 const { Header, Sider, Content } = Layout;
 
 const Teacher = () => {
@@ -36,6 +37,9 @@ const Teacher = () => {
       content = <MyLessons />;
       break;
     case "4":
+      content = <MyActivity />;
+      break;
+    case "5":
       content = <Me />;
       break;
     default:
@@ -82,6 +86,11 @@ const Teacher = () => {
             },
             {
               key: "4",
+              icon: <FaWaveSquare />,
+              label: "My Activity",
+            },
+            {
+              key: "5",
               icon: <UserOutlined />,
               label: "Me",
             },

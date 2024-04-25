@@ -43,13 +43,13 @@ const sendEmail = (isHtml, html, subject, text, to) => {
 };
 
 const renderStatus = (status) => {
-  if (status == "not-approved" || status == "banned" || status == "declined") {
+  if (status === "not-approved" || status === "banned" || status === "declined") {
     return (
       <small className="bg-danger p-2 text-white rounded text-center">
         {status}
       </small>
     );
-  } else if (status == "active") {
+  } else if (status === "active") {
     return (
       <small className="bg-success p-2 text-white rounded text-center">
         {status}
@@ -59,7 +59,7 @@ const renderStatus = (status) => {
 };
 
 const arrayFilter = (data, field, value) => {
-  return data.filter((dt) => dt[field] == value);
+  return data.filter((dt) => dt[field] === value);
 };
 
 function generateCode(length) {
@@ -75,6 +75,23 @@ function generateCode(length) {
   return code;
 }
 
+function formatText(inputText) {
+
+    // Replace ** with #
+    inputText = inputText.replace(/\*\*(.*?)\*\*/g, '# $1');
+
+    // Replace \n with new line
+    inputText = inputText.replace(/\\n/g, '\\');
+
+    // Replace \"text\" with bold or highlighted
+    inputText = inputText.replace(/"([^"]+)"/g, '\*\*$1\*\*');
+
+    // Replace * with underscore list
+    inputText = inputText.replace(/\*/g, '-');
+
+  return inputText;
+}
+
 export {
   validateEmail,
   matchValues,
@@ -83,4 +100,5 @@ export {
   arrayFilter,
   sendEmail,
   generateCode,
+  formatText,
 };

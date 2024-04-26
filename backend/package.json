@@ -6,7 +6,7 @@
   "scripts": {
     "test": "nodemon server.js",
     "start": "nodemon server.js",
-    "build": " npx run server.js -d lib",
+    "build": " npx babel server.js -d lib",
     "babel-version": "babel --version"
   },
   "author": "",

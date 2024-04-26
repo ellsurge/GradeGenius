@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 const nodemailer = require("nodemailer");
 const app = express();
 const cors = require("cors");
+
 const User = require("./models/user");
 const Department = require("./models/department");
 const Course = require("./models/course");
@@ -13,27 +14,22 @@ const StudentActivity = require("./models/student-activity");
 const StudentNote = require("./models/student-notes");
 const Lesson = require("./models/lesson");
 const Exam = require("./models/exam");
-app.use(bodyParser.urlencoded({
-  extended: false
-}));
+
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors());
+
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const multer = require("multer");
 const mongodburl = process.env.MONGODB_URL;
-const {
-  google
-} = require("googleapis");
-const {
-  v4: uuidv4
-} = require("uuid");
+const { google } = require("googleapis");
+const { v4: uuidv4 } = require("uuid");
 const OAuth2 = google.auth.OAuth2;
 const port = process.env.PORT || 3001;
-const {
-  GoogleGenerativeAI
-} = require("@google/generative-ai");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
+
 mongoose.connect(mongodburl, {
   useNewUrlParser: true,
   useUnifiedTopology: true
@@ -58,6 +54,7 @@ const storage = multer.diskStorage({
     cb(null, file.originalname);
   }
 });
+
 const upload = multer({
   storage: storage
 }).array("files", 10);
@@ -86,58 +83,39 @@ app.post("/migrate", async (req, res) => {
     }
 
     // Return success response
-    res.json({
-      message: "Data migration completed successfully."
-    });
+    res.json({ message: "Data migration completed successfully." });
   } catch (error) {
     console.error("Error migrating data:", error);
     // Return error response
-    res.status(500).json({
-      error: "Internal server error"
-    });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
 // Route to handle the /ai::prompt endpoint
 app.post("/ai", (req, res) => {
   // Extract the prompt from the request body
-  const {
-    prompt
-  } = req.body;
+  const { prompt } = req.body;
 
   // Check if prompt is provided
   if (!prompt) {
-    return res.status(400).json({
-      error: "Prompt is required."
-    });
+    return res.status(400).json({ error: "Prompt is required." });
   }
 
   // Generate content based on the prompt using the gemini-pro model
-  const model = genAI.getGenerativeModel({
-    model: "gemini-1.0-pro-latest"
-  });
+  const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro-latest" });
+
   model.generateContent(prompt).then(result => result.response.text()).then(text => {
     // Return the generated text in the response
-    res.json({
-      result: text
-    });
+    res.json({ result: text });
   }).catch(error => {
     console.error("Error:", error);
     // Return error response
-    res.status(500).json({
-      error: "Internal server error"
-    });
+    res.status(500).json({ error: "Internal server error" });
   });
 });
+
 app.post("/create-account", (req, response) => {
-  const {
-    name,
-    email,
-    password,
-    grade,
-    department,
-    role
-  } = req.body;
+  const { name, email, password, grade, department, role } = req.body;
   bcrypt.hash(password, 10).then(res => {
     const hashedPw = res;
     const newUser = new User({
@@ -148,15 +126,10 @@ app.post("/create-account", (req, response) => {
       grade: grade,
       role: role
     });
-    newUser.save().then(res => response.json({
-      result: res
-    })).catch(err => response.json({
-      error: err
-    }));
-  }).catch(err => response.json({
-    error: err
-  }));
+    newUser.save().then(res => response.json({ result: res })).catch(err => response.json({ error: err }));
+  }).catch(err => response.json({ error: err }));
 });
+
 app.post("/send-email", (req, response) => {
   // {
   //   //   const htmlContent = `
@@ -261,321 +234,199 @@ app.post("/send-email", (req, response) => {
   //   //     html: isHtml ? htmlContent : "",
   //   //   };
   // }
-  response.json({
-    result: "pass"
-  });
+  response.json({ result: "pass" });
 });
+
 app.post("/change-password/:id", (req, response) => {
   const uid = req.params.id;
-  const {
-    newPassword
-  } = req.body;
+  const { newPassword } = req.body;
   bcrypt.hash(newPassword, 10).then(res => {
     const hashedPw = res;
-    User.findByIdAndUpdate(uid, {
-      password: hashedPw
-    }).then(res => {
-      response.json({
-        result: res
-      });
+    User.findByIdAndUpdate(uid, { password: hashedPw }).then(res => {
+      response.json({ result: res });
     }).catch(err => {
-      response.json({
-        error: err
-      });
+      response.json({ error: err });
     });
-  }).catch(err => response.json({
-    error: err
-  }));
+  }).catch(err => response.json({ error: err }));
 });
+
 app.post("/change-profile/:id", (req, response) => {
   const uid = req.params.id;
-  const {
-    name,
-    email
-  } = req.body;
-  User.findByIdAndUpdate(uid, {
-    name: name,
-    email: email
-  }).then(res => {
-    response.json({
-      result: res
-    });
+  const { name, email } = req.body;
+  User.findByIdAndUpdate(uid, { name: name, email: email }).then(res => {
+    response.json({ result: res });
   }).catch(err => {
-    response.json({
-      error: err
-    });
+    response.json({ error: err });
   });
 });
 app.post("/update-user/:id", (req, response) => {
-  const {
-    account_status
-  } = req.body;
+  const { account_status } = req.body;
   const id = req.params.id;
-  User.findByIdAndUpdate(id, {
-    account_status: account_status
-  }).then(res => {
-    response.json({
-      result: res
-    });
+  User.findByIdAndUpdate(id, { account_status: account_status }).then(res => {
+    response.json({ result: res });
   }).catch(err => {
-    response.json({
-      err: err
-    });
+    response.json({ err: err });
   });
 });
+
 app.get("/get-users", (req, response) => {
-  User.find().then(res => response.json({
-    result: res
-  })).catch(err => {
-    response.json({
-      error: err
-    });
+  User.find().then(res => response.json({ result: res })).catch(err => {
+    response.json({ error: err });
   });
 });
+
 app.post("/filterUserByEmail", (req, response) => {
-  const {
-    email
-  } = req.body;
-  User.find({
-    email: email
-  }).then(res => {
-    response.json({
-      result: res
-    });
+  const { email } = req.body;
+  User.find({ email: email }).then(res => {
+    response.json({ result: res });
   }).catch(err => {
-    response.json({
-      error: err
-    });
+    response.json({ error: err });
   });
 });
+
 app.post("/checkCredentials", async (req, response) => {
-  const {
-    email,
-    password
-  } = req.body;
-  const user = await User.findOne({
-    email: email
-  });
+  const { email, password } = req.body;
+  const user = await User.findOne({ email: email });
   if (!user) {
-    response.json({
-      error: "User Not Found!"
-    });
+    response.json({ error: "User Not Found!" });
     return;
   }
   const pwmatch = await bcrypt.compare(password, user.password);
   if (!pwmatch) {
-    response.json({
-      error: "Wrong Password"
-    });
+    response.json({ error: "Wrong Password" });
     return;
   }
-  response.json({
-    result: user
-  });
+
+  response.json({ result: user });
 });
+
 app.post("/create-department", (req, response) => {
-  const {
-    name
-  } = req.body;
+  const { name } = req.body;
   const newDept = new Department({
     title: name
   });
-  newDept.save().then(res => response.json({
-    result: res
-  })).catch(err => response.json({
-    error: err
-  }));
+
+  newDept.save().then(res => response.json({ result: res })).catch(err => response.json({ error: err }));
 });
+
 app.post("/update-department/:id", (req, response) => {
-  const {
-    name
-  } = req.body;
+  const { name } = req.body;
   const id = req.params.id;
-  Department.findByIdAndUpdate(id, {
-    title: name
-  }).then(res => {
-    response.json({
-      result: res
-    });
+  Department.findByIdAndUpdate(id, { title: name }).then(res => {
+    response.json({ result: res });
   }).catch(err => {
-    response.json({
-      err: err
-    });
+    response.json({ err: err });
   });
 });
+
 app.get("/get-departments", (req, response) => {
-  Department.find().then(res => response.json({
-    result: res
-  })).catch(err => {
-    response.json({
-      error: err
-    });
+  Department.find().then(res => response.json({ result: res })).catch(err => {
+    response.json({ error: err });
   });
 });
+
 app.get("/delete-department/:id", (req, response) => {
   const id = req.params.id;
   Department.findByIdAndDelete(id).then(res => {
-    response.json({
-      result: res
-    });
+    response.json({ result: res });
   }).catch(err => {
-    response.json({
-      error: true
-    });
+    response.json({ error: true });
   });
 });
+
 app.post("/filterDeptByName", (req, response) => {
-  const {
-    name
-  } = req.body;
-  Department.find({
-    title: name
-  }).then(res => {
-    response.json({
-      result: res
-    });
+  const { name } = req.body;
+  Department.find({ title: name }).then(res => {
+    response.json({ result: res });
   }).catch(err => {
-    response.json({
-      error: err
-    });
+    response.json({ error: err });
   });
 });
+
 app.get("/get-courses", (req, response) => {
-  Course.find().then(res => response.json({
-    result: res
-  })).catch(err => {
-    response.json({
-      error: err
-    });
+  Course.find().then(res => response.json({ result: res })).catch(err => {
+    response.json({ error: err });
   });
 });
+
 app.post("/create-course", (req, response) => {
-  const {
-    name,
-    courseid,
-    department
-  } = req.body;
+  const { name, courseid, department } = req.body;
   const newDept = new Course({
     title: name,
     id: courseid,
     department: convertFieldsToObjectId(department)
   });
-  newDept.save().then(res => response.json({
-    result: res
-  })).catch(err => response.json({
-    error: err
-  }));
+
+  newDept.save().then(res => response.json({ result: res })).catch(err => response.json({ error: err }));
 });
+
 app.post("/update-course/:id", (req, response) => {
-  const {
-    name,
-    courseid,
-    department
-  } = req.body;
+  const { name, courseid, department } = req.body;
   const id = req.params.id;
   Course.findByIdAndUpdate(id, {
     title: name,
     id: courseid,
     department: department
   }).then(res => {
-    response.json({
-      result: res
-    });
+    response.json({ result: res });
   }).catch(err => {
-    response.json({
-      err: err
-    });
+    response.json({ err: err });
   });
 });
+
 app.post("/assign-teacher-to-course/:id", (req, response) => {
-  const {
-    teachers
-  } = req.body;
+  const { teachers } = req.body;
   const id = req.params.id;
-  Course.findByIdAndUpdate(id, {
-    teachers: JSON.parse(teachers)
-  }).then(res => {
-    response.json({
-      result: res
-    });
+  Course.findByIdAndUpdate(id, { teachers: JSON.parse(teachers) }).then(res => {
+    response.json({ result: res });
   }).catch(err => {
-    response.json({
-      err: err
-    });
+    response.json({ err: err });
   });
 });
+
 app.get("/release-course/:id", (req, response) => {
   const id = req.params.id;
-  Course.findByIdAndUpdate(id, {
-    status: "active"
-  }).then(res => {
-    response.json({
-      result: res
-    });
+  Course.findByIdAndUpdate(id, { status: "active" }).then(res => {
+    response.json({ result: res });
   }).catch(err => {
-    response.json({
-      err: err
-    });
+    response.json({ err: err });
   });
 });
+
 app.get("/delete-course/:id", (req, response) => {
   const id = req.params.id;
   Course.findByIdAndDelete(id).then(res => {
-    response.json({
-      result: res
-    });
+    response.json({ result: res });
   }).catch(err => {
-    response.json({
-      error: true
-    });
+    response.json({ error: true });
   });
 });
+
 app.post("/filterCourseByName", (req, response) => {
-  const {
-    name
-  } = req.body;
-  Course.find({
-    title: name
-  }).then(res => {
-    response.json({
-      result: res
-    });
+  const { name } = req.body;
+  Course.find({ title: name }).then(res => {
+    response.json({ result: res });
   }).catch(err => {
-    response.json({
-      error: err
-    });
+    response.json({ error: err });
   });
 });
+
 app.post("/filterCourseById", (req, response) => {
-  const {
-    courseid
-  } = req.body;
-  Course.find({
-    id: courseid
-  }).then(res => {
-    response.json({
-      result: res
-    });
+  const { courseid } = req.body;
+  Course.find({ id: courseid }).then(res => {
+    response.json({ result: res });
   }).catch(err => {
-    response.json({
-      error: err
-    });
+    response.json({ error: err });
   });
 });
+
 app.post("/upload-lesson", (req, response) => {
   upload(req, response, err => {
     if (err) {
-      response.json({
-        error: err
-      });
+      response.json({ error: err });
       return;
     }
-    const {
-      course,
-      title,
-      filePaths,
-      uploadedBy
-    } = req.body;
+    const { course, title, filePaths, uploadedBy } = req.body;
     const newLesson = new Lesson({
       course: course,
       title: title,
@@ -583,201 +434,135 @@ app.post("/upload-lesson", (req, response) => {
       uploadedBy: uploadedBy
     });
     newLesson.save().then(res => {
-      response.json({
-        result: res
-      });
+      response.json({ result: res });
     }).catch(err => {
-      response.json({
-        error: err
-      });
+      response.json({ error: err });
     });
   });
 });
+
 app.get("/get-lessons", (req, response) => {
   Lesson.find().then(res => {
-    response.json({
-      result: res
-    });
+    response.json({ result: res });
   }).catch(err => {
-    response.json({
-      error: err
-    });
+    response.json({ error: err });
   });
 });
+
 app.get("/get-course-regs", (req, response) => {
   CourseRegistration.find().then(res => {
-    response.json({
-      result: res
-    });
+    response.json({ result: res });
   }).catch(err => {
-    response.json({
-      error: err
-    });
+    response.json({ error: err });
   });
 });
+
 app.post("/register-for-course", (req, response) => {
-  const {
-    uid,
-    courseid
-  } = req.body;
+  const { uid, courseid } = req.body;
   const newCourseReg = new CourseRegistration({
     course: convertFieldsToObjectId(courseid),
     user: convertFieldsToObjectId(uid)
   });
   newCourseReg.save().then(res => {
-    response.json({
-      result: res
-    });
+    response.json({ result: res });
   }).catch(err => {
-    response.json({
-      error: err
-    });
+    response.json({ error: err });
   });
 });
+
 app.post("/update-course-reg/:id", (req, response) => {
-  const {
-    id
-  } = req.params;
-  const {
-    status
-  } = req.body;
-  CourseRegistration.findByIdAndUpdate(id, {
-    status: status
-  }).then(res => response.json({
-    result: res
-  })).catch(err => {
-    response.json({
-      error: err
-    });
+  const { id } = req.params;
+  const { status } = req.body;
+  CourseRegistration.findByIdAndUpdate(id, { status: status }).then(res => response.json({ result: res })).catch(err => {
+    response.json({ error: err });
   });
 });
+
 app.get("/get-exams", (req, response) => {
   Exam.find().then(Res => {
-    response.json({
-      result: Res
-    });
+    response.json({ result: Res });
   }).catch(err => {
-    response.json({
-      error: err
-    });
+    response.json({ error: err });
   });
 });
+
 app.post("/upload-exam", (req, response) => {
   upload(req, response, err => {
     if (err) {
-      response.json({
-        error: err
-      });
+      response.json({ error: err });
       return;
     }
-    const {
-      lesson,
-      title,
-      filePaths
-    } = req.body;
+    const { lesson, title, filePaths } = req.body;
     const newExam = new Exam({
       lesson: convertFieldsToObjectId(lesson),
       title: title,
       filePaths: filePaths
     });
     newExam.save().then(res => {
-      response.json({
-        result: res
-      });
+      response.json({ result: res });
     }).catch(err => {
-      response.json({
-        error: err
-      });
+      response.json({ error: err });
     });
   });
 });
+
 app.get("/generate-token", (req, response) => {
   const uuid = uuidv4();
-  const token = new Token({
-    token: uuid
-  });
+  const token = new Token({ token: uuid });
   token.save().then(res => {
-    response.json({
-      result: res
-    });
+    response.json({ result: res });
   }).catch(err => {
-    response.json({
-      error: err
-    });
+    response.json({ error: err });
   });
 });
+
 app.get("/verify-token/:token", (req, response) => {
-  const {
-    token
-  } = req.params;
-  Token.findOne({
-    token: token,
-    status: "active"
-  }).then(res => response.json({
-    result: res
-  })).catch(err => response.json({
-    error: err
-  }));
+  const { token } = req.params;
+  Token.findOne({ token: token, status: "active" }).then(res => response.json({ result: res })).catch(err => response.json({ error: err }));
 });
+
 app.get("/deactivate-token/:token", (req, response) => {
   const token = req.params.token;
-  Token.findOneAndDelete({
-    token: token
-  }).then(res => {
-    response.json({
-      result: res
-    });
+  Token.findOneAndDelete({ token: token }).then(res => {
+    response.json({ result: res });
   }).catch(err => {
-    response.json({
-      error: err
-    });
+    response.json({ error: err });
   });
 });
+
 app.get("/get-all-student-activities", (req, response) => {
-  StudentActivity.find().populate("student").populate("notes").populate("lesson").populate("course").then(res => response.json({
-    result: res
-  })).catch(err => {
+  StudentActivity.find().populate("student").populate("notes").populate("lesson").populate("course").then(res => response.json({ result: res })).catch(err => {
     console.error("Error fetching student activities:", err);
-    response.json({
-      error: err
-    });
+    response.json({ error: err });
   });
 });
+
 app.post("/create-student-activity", (req, response) => {
-  const {
-    student,
-    course,
-    lesson
-  } = req.body;
+  const { student, course, lesson } = req.body;
   const newActivity = new StudentActivity({
     student: student,
     course: course,
     lesson: lesson
   });
   newActivity.save().then(res => {
-    response.json({
-      result: res
-    });
+    response.json({ result: res });
   }).catch(err => {
-    response.json({
-      error: err
-    });
+    response.json({ error: err });
   });
 });
+
 app.post("/update-student-activity/:id", async (req, res) => {
-  const {
-    id
-  } = req.params;
+  const { id } = req.params;
   const updateData = req.body;
   // console.log(id, updateData.grade);
 
   try {
     const activity = await StudentActivity.findById(id);
+
     if (!activity) {
-      return res.status(404).json({
-        error: "Activity not found"
-      });
+      return res.status(404).json({ error: "Activity not found" });
     }
+
     if (updateData.note) {
       // Update notes
       activity.notes.push(updateData.note);
@@ -789,80 +574,50 @@ app.post("/update-student-activity/:id", async (req, res) => {
 
     // Save the updated activity
     await activity.save();
-    res.json({
-      result: activity
-    });
+
+    res.json({ result: activity });
   } catch (error) {
     console.error("Error updating activity:", error);
-    res.status(500).json({
-      error: "Internal server error"
-    });
+    res.status(500).json({ error: "Internal server error" });
   }
 });
+
 app.get("/get-all-student-notes", (req, response) => {
-  StudentNote.find().then(res => response.json({
-    result: res
-  })).catch(err => {
-    response.json({
-      error: err
-    });
+  StudentNote.find().then(res => response.json({ result: res })).catch(err => {
+    response.json({ error: err });
   });
 });
+
 app.post("/create-student-note", (req, response) => {
-  const {
-    subject,
-    content
-  } = req.body;
+  const { subject, content } = req.body;
   const newNote = new StudentNote({
     subject: subject,
     content: content
   });
   newNote.save().then(res => {
-    response.json({
-      result: res
-    });
+    response.json({ result: res });
   }).catch(err => {
-    response.json({
-      error: err
-    });
+    response.json({ error: err });
   });
 });
+
 app.post("/update-student-note", async (req, response) => {
-  const {
-    id,
-    subject,
-    content
-  } = req.body;
-  StudentNote.findByIdAndUpdate(id, {
-    subject: subject,
-    content: content
-  }).then(res => response.json({
-    result: res
-  })).catch(err => response.json({
-    error: err
-  }));
+  const { id, subject, content } = req.body;
+  StudentNote.findByIdAndUpdate(id, { subject: subject, content: content }).then(res => response.json({ result: res })).catch(err => response.json({ error: err }));
 });
+
 app.post("/upload-student-activity-file/:id", async (req, response) => {
-  const {
-    id
-  } = req.params;
-  const {
-    filePaths
-  } = req.body;
+  const { id } = req.params;
+  const { filePaths } = req.body;
   upload(req, response, async err => {
     if (err) {
-      response.json({
-        error: err
-      });
+      response.json({ error: err });
       return;
     }
+
     const activity = await StudentActivity.findById(id);
     filePaths && JSON.parse(filePaths).map(path => activity.filePaths.push(path));
-    activity.save().then(res => response.json({
-      result: res
-    })).catch(err => response.json({
-      error: err
-    }));
+    activity.save().then(res => response.json({ result: res })).catch(err => response.json({ error: err }));
   });
 });
 
@@ -871,6 +626,7 @@ const convertFieldsToObjectId = input => {
   const objId = new mongoose.Types.ObjectId(input);
   return objId;
 };
+
 app.listen(port, () => {
   console.log(`Server Listening on Port ${port}`);
 });

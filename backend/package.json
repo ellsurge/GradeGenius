@@ -6,7 +6,7 @@
   "scripts": {
     "test": "nodemon server.js",
     "start": "nodemon server.js",
-    "build": "babel src -d dist"
+     "build": "babel server.js -o dist/server.js"
   },
   "author": "",
   "license": "ISC",
@@ -24,5 +24,8 @@
     "nodemon": "^3.0.1",
     "path": "^0.12.7",
     "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.24.1"
   }
 }

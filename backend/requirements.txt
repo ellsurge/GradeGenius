@@ -1,10 +1,10 @@
-pip
-setuptools 
-wheel
-# Flask
-# Gunicorn
-# pandas
-# numpy
-# cython
-# scikit-surprise
-# pymongo
+# pip
+# setuptools 
+# wheel
+Flask
+Gunicorn
+pandas
+numpy
+cython
+scikit-surprise
+pymongo

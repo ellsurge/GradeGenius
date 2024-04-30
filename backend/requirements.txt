@@ -1,0 +1,8 @@
+
+Flask
+Gunicorn
+pandas
+numpy
+cython
+scikit-surprise
+pymongo

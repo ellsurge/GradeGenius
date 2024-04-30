@@ -1,4 +1,5 @@
-
+setuptools 
+wheel
 Flask
 Gunicorn
 pandas

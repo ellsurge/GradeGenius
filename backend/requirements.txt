@@ -4,5 +4,5 @@ Gunicorn
 pandas
 numpy
 cython
-scikit-surprise
+tensorflow-recommenders
 pymongo

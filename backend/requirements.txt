@@ -4,5 +4,5 @@ Gunicorn
 pandas
 numpy
 cython
-# scikit-surprise
+scikit-surprise
 pymongo

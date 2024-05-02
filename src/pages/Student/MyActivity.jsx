@@ -26,7 +26,8 @@ const MyActivity = () => {
       render(item) {
         const lesson =
           myLessons && item.lesson
-            ? myLessons.filter((lesson) => lesson._id === item.lesson._id)[0].title
+            ? myLessons.filter((lesson) => lesson._id === item.lesson._id)[0]
+                .title
             : "-";
         return lesson;
       },
@@ -46,7 +47,7 @@ const MyActivity = () => {
     {
       title: "Grade",
       render(item) {
-        return item.grade ;
+        return item.grade;
       },
     },
     {
@@ -546,7 +547,7 @@ const MyActivity = () => {
                   <li className="text-truncate d-flex align-items-center">
                     <small className="text-truncate">{file}</small>
                     <a
-                      href={`${apiUrl}/uploads/${file}`}
+                      href={`${file}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="ms-3"

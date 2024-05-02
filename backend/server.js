@@ -1,10 +1,10 @@
+const { createClient } = require("@supabase/supabase-js");
 const mongoose = require("mongoose");
 const express = require("express");
 const bodyParser = require("body-parser");
-const nodemailer = require("nodemailer");
 const app = express();
 const cors = require("cors");
-
+// const AWS = require("aws-sdk");
 const User = require("./models/user");
 const Department = require("./models/department");
 const Course = require("./models/course");
@@ -21,7 +21,9 @@ app.use(cors());
 
 require("dotenv").config();
 const bcrypt = require("bcrypt");
+const { S3Client } = require("@aws-sdk/client-s3");
 const multer = require("multer");
+const multerS3 = require("multer-s3");
 const mongodburl = process.env.MONGODB_URL;
 const { google } = require("googleapis");
 const { v4: uuidv4 } = require("uuid");
@@ -30,6 +32,22 @@ const port = process.env.PORT || 3001;
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 
+// const supabaseUrl = "https://wlypzkizfdeoxarhajed.supabase.co";
+// const supabaseKey = process.env.SUPABASE_KEY;
+// const supabase = createClient(supabaseUrl, supabaseKey);
+// AWS.config.update({
+//   accessKeyId: process.env.S3_ID,
+//   secretAccessKey: process.env.S3_KEY,
+//   region: "eu-central-1", // Specify your desired AWS region
+// });
+const s3 = new S3Client({
+  region: "us-east-1",
+  credentials: {
+    accessKeyId: process.env.S3_ID,
+    secretAccessKey: process.env.S3_KEY,
+  },
+});
+console.log("S3 instance created successfully.");
 mongoose
   .connect(mongodburl, {
     useNewUrlParser: true,
@@ -51,19 +69,47 @@ mongoose
 // ...
 /*UTILITIES */
 
-const storage = multer.diskStorage({
-  destination: "./uploads/",
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
-  },
-});
+// const storage = multer.diskStorage({
+//   destination: "./uploads/",
+//   filename: function (req, file, cb) {
+//     cb(null, file.originalname);
+//   },
+// });
 
 const upload = multer({
-  storage: storage,
-}).array("files", 10);
+  storage: multerS3({
+    s3: s3,
+    bucket: "grade-genius", // Specify your S3 bucket name
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    key: function (req, file, cb) {
+      console.log("!!!!!!:", file);
+      cb(null, file.originalname);
+    },
+    acl: "public-read",
+  }),
+});
+// async function uploadFile(file, name) {
+//   console.log("name:", name);
+//   try {
+//     const { data, error } = await supabase.storage
+//       .from("data-dump")
+//       .upload(name, file, {
+//         upsert: true,
+//       });
+//     if (error) {
+//       throw new Error(error.message);
+//     }
+//     console.log("data:", data);
+//     return data;
+//   } catch (error) {
+//     throw new Error(`Failed to upload file: ${error.message}`);
+//   }
+// }
 
 /*   API ROUTES    */
-
+app.get("/hello", async (_, res) => {
+  res.json({ message: "hi" });
+});
 app.post("/migrate", async (req, res) => {
   try {
     // Define an array of all models to migrate
@@ -484,28 +530,27 @@ app.post("/filterCourseById", (req, response) => {
     });
 });
 
-app.post("/upload-lesson", (req, response) => {
-  upload(req, response, (err) => {
-    if (err) {
-      response.json({ error: err });
-      return;
-    }
-    const { course, title, filePaths, uploadedBy } = req.body;
+app.post("/upload-lesson", upload.array("files"), async (req, res) => {
+  const { course, title, uploadedBy, filePaths } = req.body;
+
+    const paths = JSON.stringify(req.files.map((f) => f.location));
+    console.log(paths);
     const newLesson = new Lesson({
       course: course,
       title: title,
-      filePaths: filePaths,
+      filePaths: paths,
       uploadedBy: uploadedBy,
     });
     newLesson
       .save()
       .then((res) => {
-        response.json({ result: res });
+        res.json({ result: res });
       })
       .catch((err) => {
-        response.json({ error: err });
+        res.json({ error: err });
       });
-  });
+    // res.json({ message: "Files uploaded successfully" });
+
 });
 
 app.get("/get-lessons", (req, response) => {
@@ -564,27 +609,25 @@ app.get("/get-exams", (req, response) => {
     });
 });
 
-app.post("/upload-exam", (req, response) => {
-  upload(req, response, (err) => {
-    if (err) {
-      response.json({ error: err });
-      return;
-    }
-    const { lesson, title, filePaths } = req.body;
-    const newExam = new Exam({
-      lesson: convertFieldsToObjectId(lesson),
-      title: title,
-      filePaths: filePaths,
-    });
-    newExam
-      .save()
-      .then((res) => {
-        response.json({ result: res });
-      })
-      .catch((err) => {
-        response.json({ error: err });
-      });
+app.post("/upload-exam", upload.array("files"), async (req, response) => {
+  // const files = req.files;
+
+  const { lesson, title, filePaths } = req.body;
+  const paths = JSON.stringify(req.files.map((f) => f.location));
+
+  const newExam = new Exam({
+    lesson: convertFieldsToObjectId(lesson),
+    title: title,
+    filePaths: paths,
   });
+  newExam
+    .save()
+    .then((res) => {
+      response.json({ result: res });
+    })
+    .catch((err) => {
+      response.json({ error: err });
+    });
 });
 
 app.get("/generate-token", (req, response) => {

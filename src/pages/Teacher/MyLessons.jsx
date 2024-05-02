@@ -8,6 +8,7 @@ import {
 } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import API_URL from "../../apiUrl";
+import { download } from "../../_services";
 
 const MyLessons = () => {
   const apiUrl = API_URL;
@@ -412,7 +413,7 @@ const MyLessons = () => {
                   <small className="d-block">
                     {file}&nbsp;&nbsp;
                     <a
-                      href={`${apiUrl}/uploads/${file}`}
+                      href={file}
                       target="_blank"
                       rel="noopener noreferrer"
                       download
@@ -552,12 +553,12 @@ const MyLessons = () => {
                         <small className="d-block">
                           {file}&nbsp;&nbsp;
                           <a
-                            href={`${apiUrl}/uploads/${file}`}
+                            onClick={() => download(file)}
                             target="_blank"
                             rel="noopener noreferrer"
                             download
                           >
-                            Download
+                            Download 1
                           </a>
                         </small>
                       ))}

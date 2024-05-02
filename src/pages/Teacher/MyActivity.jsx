@@ -8,9 +8,8 @@ import {
 } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import API_URL from "../../apiUrl";
-import { fetcher } from "../../_services";
+import { fetcher, download } from "../../_services";
 import { setStudentActivities } from "../../store/store";
-
 
 const MyActivity = () => {
   const apiUrl = API_URL;
@@ -19,7 +18,9 @@ const MyActivity = () => {
     {
       title: "Course Name",
       render(item) {
-        const course = myCourses.find((course) => course._id === item.course._id);
+        const course = myCourses.find(
+          (course) => course._id === item.course._id
+        );
         return course ? course.title : "";
       },
     },
@@ -211,7 +212,9 @@ const MyActivity = () => {
               .toLowerCase()
               .includes(filterCondition.toLowerCase())
           )
-        : myActivity.filter((activity) => activity.course._id === filterCondition);
+        : myActivity.filter(
+            (activity) => activity.course._id === filterCondition
+          );
     setFilteredActivites(filtered);
   };
 
@@ -427,7 +430,7 @@ const MyActivity = () => {
                   <small className="d-block">
                     {file}&nbsp;&nbsp;
                     <a
-                      href={`${apiUrl}/uploads/${file}`}
+                      onClick={() => download(file)}
                       target="_blank"
                       rel="noopener noreferrer"
                       download

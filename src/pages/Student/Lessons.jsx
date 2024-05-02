@@ -17,7 +17,7 @@ const Lessons = () => {
       render(item) {
         const name =
           myFinalCourses.length > 0
-            ? myFinalCourses.filter((course) => course._id == item.course)[0]
+            ? myFinalCourses.filter((course) => course._id === item.course)[0]
                 .title
             : "";
         return name;
@@ -28,7 +28,7 @@ const Lessons = () => {
       render(item) {
         const id =
           myFinalCourses.length > 0
-            ? myFinalCourses.filter((course) => course._id == item.course)[0].id
+            ? myFinalCourses.filter((course) => course._id === item.course)[0].id
             : "";
         return id;
       },
@@ -37,7 +37,7 @@ const Lessons = () => {
       title: "Assigned Teachers",
       render(item) {
         const course = myFinalCourses.filter(
-          (course) => course._id == item.course
+          (course) => course._id === item.course
         )[0];
         const allTeachers = teachers.filter((teacher) =>
           course.teachers.includes(teacher._id)
@@ -56,7 +56,7 @@ const Lessons = () => {
     {
       title: "Exams & Questions",
       render(item) {
-        const exam = myExams.filter((exam) => exam.lesson == item._id)[0];
+        const exam = myExams.filter((exam) => exam.lesson === item._id)[0];
         return exam && exam.filePaths ? JSON.parse(exam.filePaths).length : 0;
       },
     },
@@ -93,33 +93,33 @@ const Lessons = () => {
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
   const myCourses = allCourses.filter(
-    (course) => course.department == currentUser.department
+    (course) => course.department === currentUser.department
   );
 
   const teachers = useSelector((state) => state.myReducer.users).filter(
-    (user) => user.role == "teacher" && user.account_status == "active"
+    (user) => user.role === "teacher" && user.account_status === "active"
   );
 
   const courseRegs = useSelector((state) => state.myReducer.courseRegs);
-  const myCourseRegs = courseRegs.filter((cr) => cr.user == currentUser._id);
+  const myCourseRegs = courseRegs.filter((cr) => cr.user === currentUser._id);
 
   const myFinalCourses = myCourses.filter((course) => {
     let isInMyCourseRegs =
-      myCourseRegs.filter((cr) => cr.course == course._id).length > 0;
+      myCourseRegs.filter((cr) => cr.course === course._id).length > 0;
     return isInMyCourseRegs;
   });
 
   const allLessons = useSelector((state) => state.myReducer.lessons);
   const myLessons = allLessons.filter((lesson) => {
     const isOfMyCourse =
-      myFinalCourses.filter((course) => course._id == lesson.course).length > 0;
+      myFinalCourses.filter((course) => course._id === lesson.course).length > 0;
     return isOfMyCourse;
   });
 
   const allExams = useSelector((state) => state.myReducer.exams);
   const myExams = allExams.filter((exam) => {
     const isOfMyLesson =
-      myLessons.filter((lesson) => lesson._id == exam.lesson).length != 0;
+      myLessons.filter((lesson) => lesson._id === exam.lesson).length != 0;
     return isOfMyLesson;
   });
 
@@ -134,7 +134,7 @@ const Lessons = () => {
 
   const filterData = () => {
     const filtered =
-      filterBy == "title"
+      filterBy === "title"
         ? myLessons.filter((course) =>
             course.title.toLowerCase().includes(filterCondition.toLowerCase())
           )
@@ -203,7 +203,7 @@ const Lessons = () => {
               <li>
                 <p className="m-0">Course Materials : </p>
                 {JSON.parse(selectedLesson.filePaths).map((file) => (
-                  <a className="d-block" href={`${apiUrl}/uploads/${file}`}>
+                  <a className="d-block" href={`${file}`}>
                     {file}
                   </a>
                 ))}
@@ -224,7 +224,7 @@ const Lessons = () => {
       >
         {showViewExamModal && (
           <div className="w-100 d-flex flex-column">
-            {myExams.filter((exam) => exam.lesson == selectedLesson._id)
+            {myExams.filter((exam) => exam.lesson === selectedLesson._id)
               .length > 0 ? (
               <div className="w-100">
                 <ul>
@@ -234,7 +234,7 @@ const Lessons = () => {
                     Exam Title :{" "}
                     {
                       myExams.filter(
-                        (exam) => exam.lesson == selectedLesson._id
+                        (exam) => exam.lesson === selectedLesson._id
                       )[0].title
                     }
                   </li>
@@ -242,7 +242,7 @@ const Lessons = () => {
                     Uploaded in :{" "}
                     {
                       myExams
-                        .filter((exam) => exam.lesson == selectedLesson._id)[0]
+                        .filter((exam) => exam.lesson === selectedLesson._id)[0]
                         .createdAt.split("T")[0]
                     }
                   </li>
@@ -253,7 +253,7 @@ const Lessons = () => {
                         <small className="d-block">
                           {file}&nbsp;&nbsp;
                           <a
-                            href={`${apiUrl}/uploads/${file}`}
+                            href={`${file}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             download

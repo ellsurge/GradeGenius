@@ -5,13 +5,16 @@
   "dependencies": {
     "@ant-design/icons": "^5.3.1",
     "@reduxjs/toolkit": "^2.2.1",
+    "@supabase/supabase-js": "^2.42.7",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "@toast-ui/react-chart": "^4.7.1",
     "antd": "^5.15.1",
     "concurrently": "^8.2.2",
+    "dotenv": "^16.4.5",
     "dropzone": "^6.0.0-beta.2",
+    "file-saver": "^2.0.5",
     "firebase": "^10.9.0",
     "googleapis": "^134.0.0",
     "react": "^18.2.0",
@@ -25,7 +28,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
+    "start": "react-scripts start",
     "start:frontend": "react-scripts start",
     "start:backend": "cd backend && npm start",
     "build": "react-scripts build",
@@ -51,8 +54,7 @@
     ]
   },
   "devDependencies": {
-    "prettier": "^3.2.5",
-    "@babel/plugin-proposal-private-property-in-object": "^7.14.5"
-
+    "@babel/plugin-proposal-private-property-in-object": "^7.14.5",
+    "prettier": "^3.2.5"
   }
 }

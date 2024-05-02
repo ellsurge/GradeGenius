@@ -37,7 +37,7 @@ const matchValues = (value1, value2) => {
 
 const fetcher = (endpoint, method = "get", body) => {
   const apiUrl = API_URL;
-  console.log("loading...");
+  console.log("loading...",apiUrl);
 
   if (method) {
     return fetch(`${apiUrl}/${endpoint}`, {
@@ -47,7 +47,7 @@ const fetcher = (endpoint, method = "get", body) => {
     })
       .then((res) => res.json())
       .then((res) => res)
-      .then(() => { console.log('done') });
+
   } else {
     return fetch(`${apiUrl}/${endpoint}`);
   }

@@ -1,8 +1,0 @@
-
-Flask
-Gunicorn
-pandas
-numpy
-cython
-tensorflow-recommenders
-pymongo

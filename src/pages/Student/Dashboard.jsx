@@ -171,7 +171,7 @@ const StudentDashboard = () => {
 
   const lineData = groupByTimeAndCourse(studentActivities);
   const averageData = calculateAverageGrade(studentActivities);
-  console.log(averageData);
+  // console.log(averageData);
   const datatest = [
     {
       time: "2024-04-16T12:12:25.982Z",

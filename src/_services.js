@@ -18,7 +18,7 @@ const download = async (path) => {
       console.error("Error downloading file:", error.message);
       return;
     }
-    console.log(data)
+    // console.log(data)
     // Extract the file data and save it using FileSaver.js
     // const fileData = new Blob([data]);
     // saveAs(fileData, path);
@@ -37,7 +37,7 @@ const matchValues = (value1, value2) => {
 
 const fetcher = (endpoint, method = "get", body) => {
   const apiUrl = API_URL;
-  console.log("loading...",apiUrl);
+  // console.log("loading...",apiUrl);
 
   if (method) {
     return fetch(`${apiUrl}/${endpoint}`, {

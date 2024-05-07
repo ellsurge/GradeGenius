@@ -82,7 +82,7 @@ const upload = multer({
     bucket: "grade-genius", // Specify your S3 bucket name
     contentType: multerS3.AUTO_CONTENT_TYPE,
     key: function (req, file, cb) {
-      console.log("!!!!!!:", file);
+      // console.log("!!!!!!:", file);
       cb(null, file.originalname);
     },
     acl: "public-read",
@@ -533,24 +533,23 @@ app.post("/filterCourseById", (req, response) => {
 app.post("/upload-lesson", upload.array("files"), async (req, res) => {
   const { course, title, uploadedBy, filePaths } = req.body;
 
-    const paths = JSON.stringify(req.files.map((f) => f.location));
-    console.log(paths);
-    const newLesson = new Lesson({
-      course: course,
-      title: title,
-      filePaths: paths,
-      uploadedBy: uploadedBy,
+  const paths = JSON.stringify(req.files.map((f) => f.location));
+  // console.log(paths);
+  const newLesson = new Lesson({
+    course: course,
+    title: title,
+    filePaths: paths,
+    uploadedBy: uploadedBy,
+  });
+  newLesson
+    .save()
+    .then((res) => {
+      res.json({ result: res });
+    })
+    .catch((err) => {
+      res.json({ error: err });
     });
-    newLesson
-      .save()
-      .then((res) => {
-        res.json({ result: res });
-      })
-      .catch((err) => {
-        res.json({ error: err });
-      });
-    // res.json({ message: "Files uploaded successfully" });
-
+  // res.json({ message: "Files uploaded successfully" });
 });
 
 app.get("/get-lessons", (req, response) => {

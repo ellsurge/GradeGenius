@@ -19,7 +19,7 @@ const MyLessons = () => {
       render(item) {
         return (
           myCourses.length > 0 &&
-          myCourses.filter((course) => course._id === item.course)[0].title
+          myCourses.filter((course) => course._id === item.course)[0]?.title
         );
       },
     },
@@ -28,7 +28,7 @@ const MyLessons = () => {
       render(item) {
         return (
           myCourses.length > 0 &&
-          myCourses.filter((course) => course._id === item.course)[0].id
+          myCourses.filter((course) => course._id === item.course)[0]?.id
         );
       },
     },
@@ -88,11 +88,9 @@ const MyLessons = () => {
   const myCourses = allCourses.filter((course) =>
     course.teachers.includes(currentUser._id)
   );
-
   const myLessons = allLessons.filter(
     (lesson) => lesson.uploadedBy === currentUser._id
   );
-
   const allExams = useSelector((state) => state.myReducer.exams);
   const myExams = allExams.filter((exam) => {
     const isOfMyLesson =
@@ -122,7 +120,7 @@ const MyLessons = () => {
     const file = e.target.files;
 
     if (type === "lesson") {
-      console.log("ok oko ko");
+      // console.log("ok oko ko");
       const files = newLesson.files;
       files.push(file);
       setNewLesson({ ...newLesson, files: files });
@@ -207,7 +205,8 @@ const MyLessons = () => {
         : myLessons.filter((lesson) => lesson.course === filterCondition);
     setFilteredLessons(filtered);
   };
-
+  // console.log("filtered:", filteredLessons);
+  // console.log("my:", myCourses);
   useEffect(() => {
     if (!filterCondition) setFilteredLessons(myLessons);
     else filterData();

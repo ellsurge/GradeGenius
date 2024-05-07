@@ -18,8 +18,11 @@ const MyActivity = () => {
     {
       title: "Course Name",
       render(item) {
+        // console.log("MC::",myCourses);
+        // console.log("fC::", item);
+
         const course = myCourses.find(
-          (course) => course._id === item.course._id
+          (course) => course?._id === item?.course._id
         );
         return course ? course.title : "";
       },
@@ -382,26 +385,26 @@ const MyActivity = () => {
         style={{ width: "80%" }}
         footer={[]}
       >
+
         {showViewModal && (
           <ul>
             <li>
               Course Name :{" "}
-              {
+              {myCourses.length > 0 &&
                 myCourses.filter(
-                  (course) => course._id == selectedActivity.course
-                )[0].title
-              }
+                  (course) => course._id == selectedActivity.course._id
+                )[0].title}
             </li>
             <li>
               Course ID :{" "}
-              {
+              {myCourses.length > 0 &&
                 myCourses.filter(
-                  (course) => course._id === selectedActivity.course
-                )[0].id
-              }
+                  (course) => course._id === selectedActivity.course._id
+                )[0].id}
             </li>
             <li>
               notes :{" "}
+              
               {selectedActivity.notes.map((note) => (
                 //notes has subjct and content
                 <div className="container">

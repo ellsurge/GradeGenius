@@ -103,7 +103,7 @@ const MyActivity = () => {
   const myActivities = activities.filter(
     (activity) => activity.student._id === currentUser._id
   );
-  console.log(activities);
+  // console.log(activities);
   const notes = useSelector((state) => state.myReducer.studentNotes);
 
   const [showAddActivityModal, setShowAddActivityModal] = useState(false);
@@ -814,11 +814,6 @@ const MyActivity = () => {
                   key: "2",
                   label: "My Notes",
                   children: activityNotes(),
-                },
-                {
-                  key: "3",
-                  label: "My Files",
-                  children: activityFiles(),
                 },
               ]}
               className="text-start"

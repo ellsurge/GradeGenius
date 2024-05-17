@@ -16,7 +16,7 @@ const MyActivity = () => {
       render(item) {
         const course =
           myFinalCourses.length > 0 &&
-          myFinalCourses.filter((course) => course._id === item.course._id)[0]
+          myFinalCourses.filter((course) => course?._id === item.course?._id)[0]
             .title;
         return course;
       },
@@ -26,7 +26,7 @@ const MyActivity = () => {
       render(item) {
         const lesson =
           myLessons && item.lesson
-            ? myLessons.filter((lesson) => lesson._id === item.lesson._id)[0]
+            ? myLessons.filter((lesson) => lesson?._id === item.lesson?._id)[0]
                 .title
             : "-";
         return lesson;

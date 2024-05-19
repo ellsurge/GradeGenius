@@ -116,13 +116,13 @@ const StudentDashboard = () => {
       if (!existingEntry) {
         existingEntry = {
           time: itemDate,
-          ...Object.fromEntries(data.map((item) => [item.course.title, null])),
+          ...Object.fromEntries(data.map((item) => [item.course?.title, null])),
         };
         groupedData.push(existingEntry);
       }
 
       // Update the current courses
-      existingEntry[item.course.title] = convertGradeToNumber(item.grade);
+      existingEntry[item.course?.title] = convertGradeToNumber(item.grade);
 
       // Replace null values with the previous grades
       Object.entries(existingEntry).forEach(([course, grade]) => {
@@ -281,7 +281,7 @@ const StudentDashboard = () => {
         </Row>
         <Flex
           className="bg-light"
-           style={boxStyle}
+          style={boxStyle}
           justify={"space-between"}
           align={"flex-start"}
         >

@@ -17,7 +17,7 @@ const MyActivity = () => {
         const course =
           myFinalCourses.length > 0 &&
           myFinalCourses.filter((course) => course?._id === item.course?._id)[0]
-            .title;
+            ?.title;
         return course;
       },
     },
@@ -27,7 +27,7 @@ const MyActivity = () => {
         const lesson =
           myLessons && item.lesson
             ? myLessons.filter((lesson) => lesson?._id === item.lesson?._id)[0]
-                .title
+                ?.title
             : "-";
         return lesson;
       },
@@ -98,7 +98,8 @@ const MyActivity = () => {
       0;
     return isOfMyCourse;
   });
-
+  console.log(allLessons);
+  console.log(myFinalCourses);
   const activities = useSelector((state) => state.myReducer.studentActivities);
   const myActivities = activities.filter(
     (activity) => activity.student._id === currentUser._id
@@ -695,7 +696,7 @@ const MyActivity = () => {
     <div className="w-100">
       <h5 className="text-center">My Activity</h5>
       <div className="mx-auto" style={{ maxWidth: "80%" }}>
-        {myActivities.length !== 0 ? (
+        {myActivities.length >= 0 ? (
           <div className="w-100">
             <div className=" mt-3 p-3">
               <Button

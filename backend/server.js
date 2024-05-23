@@ -41,7 +41,7 @@ const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 //   region: "eu-central-1", // Specify your desired AWS region
 // });
 const s3 = new S3Client({
-  region: "us-east-1",
+  region: "eu-north-1",
   credentials: {
     accessKeyId: process.env.S3_ID,
     secretAccessKey: process.env.S3_KEY,
@@ -79,7 +79,7 @@ mongoose
 const upload = multer({
   storage: multerS3({
     s3: s3,
-    bucket: "grade-genius", // Specify your S3 bucket name
+    bucket: "grade-genius-v2", // Specify your S3 bucket name
     contentType: multerS3.AUTO_CONTENT_TYPE,
     key: function (req, file, cb) {
       // console.log("!!!!!!:", file);
